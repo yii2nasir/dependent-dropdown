@@ -1,0 +1,74 @@
+USE BY ->  http://demos.krajee.com/widget-details/depdrop
+
+Genrate models for all tables 
+
+like 
+country->state->city
+
+Create crud for child (city).
+
+Generating code using template "C:\xampp\htdocs\study.local\advanced\vendor\yiisoft\yii2-gii\src\generators\crud/default"...
+generated modules\ddl\controllers\CityController.php
+generated modules\ddl\models\CitySearch.php
+generated backend\modules\ddl\models\views\city\_form.php
+generated backend\modules\ddl\models\views\city\_search.php
+generated backend\modules\ddl\models\views\city\create.php
+generated backend\modules\ddl\models\views\city\index.php
+generated backend\modules\ddl\models\views\city\update.php
+generated backend\modules\ddl\models\views\city\view.php
+done!
+
+/************************/
+Add relationship
+
+Country.php_view
+
+ public function getState()
+    {
+        return $this->hasMany(State::className(), ['Country_id' => 'id']);
+    }
+	
+State.php_view
+	
+	public function getCities()
+    {
+        return $this->hasMany(City::className(), ['state_id' => 'id']);
+    }
+
+    public function getCountry()
+    {
+        return $this->hasOne(Country::className(), ['id' => 'Country_id']);
+    }
+	
+City.php_view
+
+public function getState()
+    {
+        return $this->hasOne(State::className(), ['id' => 'state_id']);
+    }
+	
+/****************************/
+
+
+view on city. index.php  LIST view
+
+'columns' => [
+            ['class' => 'yii\grid\SerialColumn'],
+
+            'id',
+            'name',
+            'state_id',
+            'state.Name',
+            'state.country.name',
+            //'country.state.name',
+
+            ['class' => 'yii\grid\ActionColumn'],
+        ],]);
+		
+		
+/***************************/
+use yii\helpers\ArrayHelper;
+
+$CountryList = ArrayHelper::map(Country::find()->all(),'id','name');
+   
+<?php echo $form->field($model, 'state_id')->dropDownList($CountryList, ['id'=>'cat-id','prompt'=>'Country Name']); ?>
