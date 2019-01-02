@@ -67,8 +67,74 @@ view on city. index.php  LIST view
 		
 		
 /***************************/
+use yii\helpers\Json; //IN CONTROLLER
+
 use yii\helpers\ArrayHelper;
+use kartik\depdrop\DepDrop;
+use yii\helpers\Url;
 
 $CountryList = ArrayHelper::map(Country::find()->all(),'id','name');
+
+//////////////////// 
+view form
+///////////////////////
+
+<div class="city-form">
+
+    <?php $form = ActiveForm::begin(); 
+    $modelstate=new State();
+    $modelcity=new City();
+    ?>
+
+   <?php echo $form->field($modelstate, 'country_id')->dropDownList($CountryList, ['id'=>'cat-id','prompt'=>'Country Name']); 
+   
+   echo $form->field($modelcity, 'state_id')->widget(DepDrop::classname(), [
+    'options'=>['id'=>'subcat-id'],
+    'pluginOptions'=>[
+        'depends'=>['cat-id'],
+        'placeholder'=>'Select...',
+        'url'=>Url::to(['/ddl/city/formdata'])
+    ]
+]);
+
+echo $form->field($model, 'name')->widget(DepDrop::classname(), [
+    'options'=>['id'=>'subcat-id2'],
+    'pluginOptions'=>[
+        'depends'=>['subcat-id'],
+        'placeholder'=>'Select...',
+        'url'=>Url::to(['/ddl/city/formdata2'])
+    ]
+]);
+   
+   ?>
+   
+  /*************** and controller add **********************/
+  
+      public function actionFormdata(){
+        $out= [['id'=>'1', 'name'=>'name1'],
+            ['id'=>'2', 'name'=>'name2'] ];
+        $ids = isset($_REQUEST['depdrop_parents'])?$_REQUEST['depdrop_parents']:1;  
+        $states=State::find()->select('id,name')->where(['country_id'=>$ids[0]])->asArray()->all();
+               echo Json::encode(['output'=>$states, 'selected'=>'']);
+               return;
+    }
+
+    public function actionFormdata2(){
+        $ids = isset($_REQUEST['depdrop_parents'])?$_REQUEST['depdrop_parents']:1;
+        $city=city::find()->select('id,name')->where(['state_id'=>$ids[0]])->asArray()->all();
+        echo Json::encode(['output'=>$city, 'selected'=>'']);
+        return;
+    }
+
+
+    <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
+
+    <?= $form->field($model, 'state_id')->textInput() ?>
+
+    <div class="form-group">
+        <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
+    </div>
+
+    <?php ActiveForm::end(); ?>
    
 <?php echo $form->field($model, 'state_id')->dropDownList($CountryList, ['id'=>'cat-id','prompt'=>'Country Name']); ?>
